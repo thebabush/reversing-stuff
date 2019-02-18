@@ -9,8 +9,8 @@ If you look at the end of `start`, you'll notice something like this:
 wrmsr(0xC0000101, some_addr);
 [...]
 
-That's MSR_GS_BASE and it's used to, guess what, tell the CPU where to look
-for when you have something like `gs:0`.
+That's MSR_GS_BASE and it's used to, guess what, tell the CPU where to look for
+when you have something like `gs:0`.
 
 IDA wouldn't let me force `gs`'s value so...
 
@@ -43,6 +43,7 @@ See: https://www.msreverseengineering.com/blog/2015/6/29/transparent-deobfuscati
 
 from __future__ import print_function
 
+import os
 import re
 
 """
@@ -163,9 +164,9 @@ class hyperv_gs_proc_t(idaapi.plugin_t):
 
     def init(self):
         self.hook = None
-        # TODO: Add proper input file filter logic here
-        # if idc.GetInputMD5() != input_md5 or idaapi.ph_get_id() != idaapi.PLFM_386:
-                # return idaapi.PLUGIN_SKIP
+        hv_name = os.path.split(idaapi.get_input_file_path())[1].lower()
+        if hv_name not in ('hvix64.exe', 'hvax64.exe') or idaapi.ph_get_id() != idaapi.PLFM_386:
+            return idaapi.PLUGIN_SKIP
         self.hook = hypervGsProcHook()
         self.hook.hook()
         return idaapi.PLUGIN_KEEP
